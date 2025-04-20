@@ -1,0 +1,12 @@
+# User-space files
+config/user.json
+config/certs/
+logs/
+
+# Editor files
+.idea/
+.vscode/
+
+# Python
+__pycache__
+*.pyc
