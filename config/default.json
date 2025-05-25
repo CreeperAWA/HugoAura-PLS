@@ -4,6 +4,14 @@
   "wsPort": 22077,
   "certPath": "config/certs/cert.crt",
   "keyPath": "config/certs/cert.key",
-  "mqttCertPath": "config/certs/mqttCert.crt",
-  "mqttKeyPath": "config/certs/mqttCert.key"
+  "ruleSettings": {
+    "client": {
+      "security": {
+        "uploadFreezeInfo": {
+          "enable": true,
+          "rewriteMode": "allFreeze"
+        }
+      }
+    }
+  }
 }

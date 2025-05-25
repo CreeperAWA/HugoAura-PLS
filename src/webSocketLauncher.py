@@ -1,52 +1,74 @@
+import json
 import asyncio
 from typing import Any
 from websockets import ServerConnection, broadcast
 from websockets.asyncio.server import serve
 from loguru import logger
 
+import lifecycle
 from middleware.auth import getAuthStatus
+from routes.router import router
+from services.basic import initialPush
 
 
-userConnections = set()
 wsServerIns = None
 authToken = ""
 
 
 async def wsHandler(websocket: ServerConnection):
     global authToken
-    global userConnections
     authResult = getAuthStatus(authToken, websocket)
-    if authResult == False:
+    if not authResult:
         await websocket.close()
         return
-    userConnections.add(websocket)
+    lifecycle.userConnections.add(websocket)
+    await initialPush(websocket)
     async for data in websocket:
-        logger.debug(f"New WebSocket data received: {data}")
+        logger.debug(f"⏬ New WebSocket data received: {data}")
+        try:
+            parsedData = json.loads(data)
+        except:
+            logger.error(f"Error parsing client data: {data}")
+            parsedData = {}
+        asyncio.create_task(router(websocket, parsedData)) # type: ignore
 
     logger.info(f"Client {websocket.id} disconnected, bye.")
-    userConnections.remove(websocket)
+    lifecycle.userConnections.remove(websocket)
 
 
 async def broadcastMessage(message: Any):
     global wsServerIns
     if wsServerIns:
-        broadcast(userConnections, message)
+        broadcast(lifecycle.userConnections, message)
 
 
 async def launchWebSocket(wsHost: str, wsPort: int, sslContext):
     global wsServerIns
-    async with serve(
-        wsHandler,
-        host=wsHost,
-        port=wsPort,
-        server_header="AuraPLSWebSocket/1.0.0",
-        ssl=sslContext,
-    ) as wsServer:
-        wsServerIns = wsServer
-        logger.info(
-            f"WebSocket server listening on ws{'' if sslContext == None else 's'}://{wsHost}:{wsPort}/"
-        )
-        await wsServer.serve_forever()
+    if sslContext != None and lifecycle.cliArgv.ws_insecure == "true":
+        async with serve(
+            wsHandler,
+            host=wsHost,
+            port=wsPort,
+            server_header="AuraPLSWebSocket/1.0.0",
+        ) as wsNonSSLServer:
+            lifecycle.wsServerInstance = wsNonSSLServer
+            wsServerIns = wsNonSSLServer
+            logger.success(f"🎉 WebSocket debug server listening on ws://{wsHost}:{wsPort}/")
+            await wsNonSSLServer.serve_forever()
+    else:
+        async with serve(
+            wsHandler,
+            host=wsHost,
+            port=wsPort,
+            server_header="AuraPLSWebSocket/1.0.0",
+            ssl=sslContext,
+        ) as wsServer:
+            lifecycle.wsServerInstance = wsServer
+            wsServerIns = wsServer
+            logger.success(
+                f"🎉 WebSocket server listening on ws{'' if sslContext == None else 's'}://{wsHost}:{wsPort}/"
+            )
+            await wsServer.serve_forever()
 
 
 async def asyncLaunchWS(

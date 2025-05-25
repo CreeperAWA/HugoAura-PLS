@@ -13,5 +13,9 @@ def parseArgv():
         required=False,
         help="Aura ProxyLayerServices WebSocket server port",
     )
+    parser.add_argument("--debug", required=False, help="Enable debugging features")
+    parser.add_argument(
+        "--ws-insecure", required=False, help="Disable wss for WebSocket server"
+    )
     result = parser.parse_args()
     return result

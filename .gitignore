@@ -2,6 +2,7 @@
 config/user.json
 config/certs/
 logs/
+.DS_Store
 
 # Editor files
 .idea/
@@ -10,3 +11,8 @@ logs/
 # Python
 __pycache__
 *.pyc
+*.spec
+
+# Build Artifacts
+dist/
+build/
