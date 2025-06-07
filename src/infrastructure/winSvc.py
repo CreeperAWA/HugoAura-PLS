@@ -1,3 +1,4 @@
+import sys
 import win32serviceutil
 import win32service
 import win32event
@@ -9,11 +10,12 @@ from loguru import logger
 
 from appLauncher import main
 
+
 class AuraPLSService(win32serviceutil.ServiceFramework):
     _svc_name_ = "HugoAuraPLS"
     _svc_display_name_ = "Aura PLS Service"
     _svc_description_ = "HugoAura PLS, Proxy Layer Services for HugoAura."
-    _exe_args_ = "--service"
+    _svc_deps_ = ["Dnscache", "EventLog", "RpcSs"]
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
@@ -34,6 +36,7 @@ class AuraPLSService(win32serviceutil.ServiceFramework):
         win32event.SetEvent(self.hWaitStop)
         self.ReportServiceStatus(win32service.SERVICE_STOPPED)
         logger.info("Aura PLS service has stopped.")
+        sys.exit(0)
 
     def SvcDoRun(self):
         servicemanager.LogMsg(
@@ -62,3 +65,9 @@ class AuraPLSService(win32serviceutil.ServiceFramework):
         finally:
             if self.loop:
                 self.loop.close()
+
+
+def checkIsSvcCmd(argv):
+    if len(argv) < 2:
+        return True
+    return not "--cli" in argv[1].lower()

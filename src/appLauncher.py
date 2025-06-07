@@ -36,7 +36,7 @@ async def main(stopEvent: asyncio.Event | None = None):
         result = generateSelfSignedCert(config)
         if not result:
             logger.error("⛔ TLS certificate initialization failed, exiting PLS...")
-            exit(-2)
+            sys.exit(-2)
     else:
         certFullPathExists = Path.joinpath(
             Path(plsDataDir), Path(config.certPath)
@@ -48,7 +48,7 @@ async def main(stopEvent: asyncio.Event | None = None):
             logger.error(
                 f"⛔ TLS {"certificate" if not certFullPathExists else "key"} path invalid, exiting PLS..."
             )
-            exit(-3)
+            sys.exit(-3)
 
     logger.info("🔒 Creating SSL Context for WebSocket server...")
     wsSSLContext = createSSLContext(config, "ws")

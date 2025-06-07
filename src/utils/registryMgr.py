@@ -15,7 +15,7 @@ from typeDefs.utils.registryMgr import (
 class RegistryManager:
     def __init__(
         self,
-        rootClass=winreg.HKEY_CURRENT_USER,
+        rootClass=winreg.HKEY_CURRENT_USER, ## eqeqeq HKEY_USERS/.DEFAULT in serviceMode
         path=["SOFTWARE", "HugoAura", "ProxyLayerServices"],
     ):
         self.rootClass = rootClass

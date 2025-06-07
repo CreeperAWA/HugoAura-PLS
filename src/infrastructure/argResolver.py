@@ -1,17 +1,17 @@
 import argparse
 
 
-def parseArgv():
+def parseArgv(bypass=False):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--ws-port",
+        "--cli",
         required=False,
-        help="Aura ProxyLayerServices WebSocket server port",
+        help="Run as CLI",
     )
     parser.add_argument("--debug", required=False, help="Enable debugging features")
-    parser.add_argument(
-        "--ws-insecure", required=False, help="Disable wss for WebSocket server"
-    )
-    parser.add_argument("--service", required=False, help="Launch as service mode")
-    result = parser.parse_args()
+    result = None
+    if not bypass:
+        result = parser.parse_args()
+    else:
+        result = parser.parse_args([])
     return result

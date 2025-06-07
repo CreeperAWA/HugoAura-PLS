@@ -90,7 +90,7 @@ def addWsPortRegKey(port: int, isSSL: bool):
 async def launchWebSocket(wsHost: str, wsPort: int, sslContext):
     global wsServerIns
 
-    useSSL = sslContext is not None and lifecycle.cliArgv.ws_insecure != "true"
+    useSSL = sslContext is not None
 
     currentPort = wsPort
     maxRetries = 10

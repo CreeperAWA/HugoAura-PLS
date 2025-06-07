@@ -8,36 +8,58 @@ if srcDir not in sys.path:
 
 import asyncio
 import win32serviceutil
+import servicemanager
 from pathlib import Path
 from loguru import logger
 
 import lifecycle
-from infrastructure.winSvc import AuraPLSService
+from infrastructure.winSvc import AuraPLSService, checkIsSvcCmd
 from infrastructure.argResolver import parseArgv
 from infrastructure.logger import setupLogger
 from appLauncher import main
 
 if __name__ == "__main__":
-    plsDataDir = Path.joinpath(Path.home(), "Documents", "HugoAura", "Aura-PLS")
-    lifecycle.plsDataDir = plsDataDir
-
-    cliArgv = parseArgv()
-    lifecycle.serviceMode = True if cliArgv.service else False
-    lifecycle.cliArgv = cliArgv
-    lifecycle.isDebug = cliArgv.debug == "true"
-
-    setupLogger(lifecycle.isDebug, lifecycle.serviceMode, plsDataDir)
-    logger.info("🚀 Logger initialized.")
-
-    logger.debug(f"⌨️ CLI args: {cliArgv}")
+    if checkIsSvcCmd(sys.argv):
+        lifecycle.serviceMode = True
 
     if lifecycle.serviceMode:
-        win32serviceutil.HandleCommandLine(
-            AuraPLSService, argv=[sys.argv[0], cliArgv.service]
+        programDataDir = os.getenv("PROGRAMDATA")
+        plsDataDir = Path.joinpath(
+            Path(programDataDir if programDataDir else "C:\\ProgramData"),
+            "HugoAura",
+            "PLS",
         )
     else:
+        plsDataDir = Path.joinpath(Path.home(), "Documents", "HugoAura", "Aura-PLS")
+
+    lifecycle.plsDataDir = plsDataDir
+
+    if lifecycle.serviceMode:
+        lifecycle.isDebug = False
+        setupLogger(False, True)
+        logger.info("Starting as serviceMode...")
+        logger.info(f"Command line argv: {sys.argv}")
+
+        if len(sys.argv) == 1:
+            servicemanager.Initialize()
+            servicemanager.PrepareToHostSingle(AuraPLSService)
+            servicemanager.StartServiceCtrlDispatcher()
+        else:
+            win32serviceutil.HandleCommandLine(
+                AuraPLSService,
+            )
+    else:
+        cliArgv = parseArgv()
+        lifecycle.cliArgv = cliArgv
+        lifecycle.isDebug = cliArgv.debug == "true"
+
+        setupLogger(lifecycle.isDebug, lifecycle.serviceMode)
+        logger.info("🚀 Logger initialized.")
+
+        logger.debug(f"⌨️ CLI args: {lifecycle.cliArgv}")
+
         try:
             asyncio.run(main())
         except KeyboardInterrupt:
             logger.error("👋 Exiting Aura-PLS...")
-            exit(0)
+            sys.exit(0)

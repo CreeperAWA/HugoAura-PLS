@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from pathlib import Path
 from loguru import logger
 import sys
@@ -20,7 +21,7 @@ def genDynColor(record):
     return result
 
 
-def setupLogger(debug: bool, serviceMode: bool, dataDir: Path):
+def setupLogger(debug: bool, serviceMode: bool):
     logger.remove(0)
     if not serviceMode:
         logger.add(
@@ -29,16 +30,19 @@ def setupLogger(debug: bool, serviceMode: bool, dataDir: Path):
             colorize=True,
             level="DEBUG" if debug else "INFO",
         )
-    else:
-        datetimeIns = datetime.now()
-        logDir = Path.joinpath(dataDir, "logs")
-        logger.add(
-            Path.joinpath(
-                logDir,
-                f"PLS-Service-{datetimeIns.year}-{str(datetimeIns.month).zfill(2)}-{str(datetimeIns.day).zfill(2)}-{str(datetimeIns.hour).zfill(2)}-{str(datetimeIns.minute).zfill(2)}-{str(datetimeIns.second).zfill(2)}.log",
-            ),
-            level="DEBUG" if debug else "INFO",
-        )
+
+    datetimeIns = datetime.now()
+    logDir = Path.joinpath(
+        lifecycle.plsDataDir,
+        "logs",
+    )
+    logger.add(
+        Path.joinpath(
+            logDir,
+            f"PLS-{"Service" if serviceMode else "CLI"}-{datetimeIns.year}-{str(datetimeIns.month).zfill(2)}-{str(datetimeIns.day).zfill(2)}-{str(datetimeIns.hour).zfill(2)}-{str(datetimeIns.minute).zfill(2)}-{str(datetimeIns.second).zfill(2)}.log",
+        ),
+        level="DEBUG" if debug else "INFO",
+    )
 
     lifecycle.loggerInstance = logger
     return logger
