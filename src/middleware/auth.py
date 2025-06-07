@@ -5,7 +5,7 @@ from websockets import ServerConnection
 def getAuthStatus(authToken: str, clientRequest: ServerConnection):
     if clientRequest.request == None:
         return False
-    logger.debug(clientRequest.request.path)
+    # logger.debug(clientRequest.request.path)
     authHeader = clientRequest.request.headers.get("Authorization")
     if authHeader == None:
         # 一开始以为希沃管家的主进程会有 `ws` 模块, 没想到没有... 所以现在有两种认证模式
@@ -13,7 +13,7 @@ def getAuthStatus(authToken: str, clientRequest: ServerConnection):
         clientRequestAuthParams = clientRequest.request.path.split("auth=")
         if len(clientRequestAuthParams) > 1 and clientRequestAuthParams[1] == authToken:
             logger.info(
-                f"Client {clientRequest.id} trying to connect with auth params {clientRequestAuthParams}, accepted."
+                f"Client {clientRequest.id} trying to connect with auth params ******, accepted."
             )
             return True
         return False
@@ -26,6 +26,6 @@ def getAuthStatus(authToken: str, clientRequest: ServerConnection):
         return False
 
     logger.info(
-        f"Client {clientRequest.id} trying to connect with auth header {authHeader}, accepted."
+        f"Client {clientRequest.id} trying to connect with auth header ******, accepted."
     )
     return True

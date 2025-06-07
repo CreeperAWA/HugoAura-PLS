@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import shutil
 from loguru import logger
 import lifecycle
@@ -30,10 +31,18 @@ def loadConfig(
     os.makedirs(os.path.dirname(configPath), exist_ok=True)
 
     try:
-        with open(defaultConfPath) as f:
+        with open(
+            str(
+                Path.joinpath(
+                    Path("." if not lifecycle.meiPassDir else lifecycle.meiPassDir),
+                    Path(defaultConfPath),
+                )
+            )
+        ) as f:
             defaultConfig = json.load(f)
     except FileNotFoundError:
         logger.error(f"Default config file not found at {defaultConfPath}")
+        input("Press any key to continue...")
         raise
 
     try:

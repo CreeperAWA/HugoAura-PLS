@@ -4,11 +4,6 @@ import argparse
 def parseArgv():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--aura-pls-auth-token",
-        required=True,
-        help="Aura ProxyLayerServices WebSocket server authorization token",
-    )
-    parser.add_argument(
         "--ws-port",
         required=False,
         help="Aura ProxyLayerServices WebSocket server port",
@@ -17,5 +12,6 @@ def parseArgv():
     parser.add_argument(
         "--ws-insecure", required=False, help="Disable wss for WebSocket server"
     )
+    parser.add_argument("--service", required=False, help="Launch as service mode")
     result = parser.parse_args()
     return result

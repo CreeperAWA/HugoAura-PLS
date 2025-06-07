@@ -2,13 +2,14 @@
   "proxyProcArr": ["SeewoCore.exe"],
   "wsHost": "127.0.0.1",
   "wsPort": 22077,
+  "regenCert": true,
   "certPath": "config/certs/cert.crt",
   "keyPath": "config/certs/cert.key",
   "ruleSettings": {
     "client": {
       "security": {
         "uploadFreezeInfo": {
-          "enable": true,
+          "enable": false,
           "rewriteMode": "allFreeze"
         }
       }

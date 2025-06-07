@@ -9,6 +9,7 @@ class AuraPLSConfig(BaseModel):
     proxyProcArr: list[str]
     wsHost: str
     wsPort: int
+    regenCert: bool
     certPath: str
     keyPath: str
     ruleSettings: dict

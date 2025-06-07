@@ -1,4 +1,5 @@
-import inspect
+from datetime import datetime
+from pathlib import Path
 from loguru import logger
 import sys
 
@@ -19,13 +20,25 @@ def genDynColor(record):
     return result
 
 
-def setupLogger(debug: bool):
+def setupLogger(debug: bool, serviceMode: bool, dataDir: Path):
     logger.remove(0)
-    logger.add(
-        sys.stdout,
-        format=genDynColor,
-        colorize=True,
-        level="DEBUG" if debug else "INFO",
-    )
+    if not serviceMode:
+        logger.add(
+            sys.stdout,
+            format=genDynColor,
+            colorize=True,
+            level="DEBUG" if debug else "INFO",
+        )
+    else:
+        datetimeIns = datetime.now()
+        logDir = Path.joinpath(dataDir, "logs")
+        logger.add(
+            Path.joinpath(
+                logDir,
+                f"PLS-Service-{datetimeIns.year}-{str(datetimeIns.month).zfill(2)}-{str(datetimeIns.day).zfill(2)}-{str(datetimeIns.hour).zfill(2)}-{str(datetimeIns.minute).zfill(2)}-{str(datetimeIns.second).zfill(2)}.log",
+            ),
+            level="DEBUG" if debug else "INFO",
+        )
+
     lifecycle.loggerInstance = logger
     return logger

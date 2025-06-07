@@ -11,7 +11,6 @@ logs/
 # Python
 __pycache__
 *.pyc
-*.spec
 
 # Build Artifacts
 dist/
