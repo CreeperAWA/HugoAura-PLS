@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import ssl
 from loguru import logger
@@ -71,6 +72,13 @@ def generateSelfSignedCert(userConfig: AuraPLSConfig):
             )
             .sign(privateKey, hashes.SHA512())
         )
+
+        certParentPath = Path.joinpath(
+            lifecycle.plsDataDir, Path(userConfig.certPath)
+        ).parent
+
+        if not certParentPath.exists():
+            os.makedirs(str(certParentPath), exist_ok=True)
 
         try:
             with open(

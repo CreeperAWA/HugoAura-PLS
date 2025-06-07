@@ -30,15 +30,13 @@ def loadConfig(
 ) -> AuraPLSConfig:
     os.makedirs(os.path.dirname(configPath), exist_ok=True)
 
+    defaultConfigFullPath = Path.joinpath(
+        Path("." if not lifecycle.meiPassDir else lifecycle.meiPassDir),
+        Path(defaultConfPath),
+    )
+
     try:
-        with open(
-            str(
-                Path.joinpath(
-                    Path("." if not lifecycle.meiPassDir else lifecycle.meiPassDir),
-                    Path(defaultConfPath),
-                )
-            )
-        ) as f:
+        with open(str(defaultConfigFullPath)) as f:
             defaultConfig = json.load(f)
     except FileNotFoundError:
         logger.error(f"Default config file not found at {defaultConfPath}")
@@ -58,8 +56,8 @@ def loadConfig(
         logger.warning(
             "No user config file found, creating a new config using default.json ..."
         )
-        shutil.copyfile(defaultConfPath, configPath)
-        with open(defaultConfPath) as f:
+        shutil.copyfile(str(defaultConfigFullPath), configPath)
+        with open(str(defaultConfigFullPath)) as f:
             config = AuraPLSConfig(**json.load(f))
 
     config._configPath = configPath

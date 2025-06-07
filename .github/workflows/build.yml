@@ -1,0 +1,72 @@
+name: Build PLS EXE
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: "PLS Source"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: false
+          virtualenvs-path: ~/.cache/pypoetry/virtualenvs
+
+      - name: Configure Poetry
+        run: |
+          %USERPROFILE%\.local\bin\poetry config virtualenvs.create true
+          %USERPROFILE%\.local\bin\poetry config virtualenvs.in-project false
+        shell: cmd
+        working-directory: "PLS Source"
+
+      - name: Install dependencies
+        run: |
+          %USERPROFILE%\.local\bin\poetry install
+        shell: cmd
+        working-directory: "PLS Source"
+
+      - name: Build project
+        run: |
+          $venvPath = C:\Users\runneradmin\.local\bin\poetry env info --path
+          & "$venvPath\Scripts\Activate.ps1"
+
+          & ".\scripts\build.bat"
+        shell: powershell
+        working-directory: "PLS Source"
+
+      - name: Verify build output
+        run: |
+          if (Test-Path ".\dist\HugoAura-PLS.exe") {
+            Write-Output "Build successful - Output found"
+            Get-ChildItem ".\dist\" -Recurse
+          } else {
+            Write-Error "Build failed - Output not found"
+            exit 1
+          }
+        shell: powershell
+        working-directory: "PLS Source"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HugoAura-PLS-${{ github.sha }}
+          path: "PLS Source/dist/HugoAura-PLS.exe"
+          retention-days: 15
