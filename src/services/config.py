@@ -45,7 +45,7 @@ def updateConfig(target: str, data: Any) -> UPDATE_CONFIG_RETURN:
     currentConfig = lifecycle.appConfig
     levelIdx = 0
     for levelIdx in range(len(targetArr) - 1):
-        level = target[levelIdx]
+        level = targetArr[levelIdx]
         isKeyValid = (
             (level in currentConfig) if levelIdx != 0 else hasattr(currentConfig, level)
         )
@@ -53,7 +53,6 @@ def updateConfig(target: str, data: Any) -> UPDATE_CONFIG_RETURN:
             currentConfig = (
                 currentConfig[level] if levelIdx != 0 else getattr(currentConfig, level)
             )
-            levelIdx += 1
         else:
             return UPDATE_CONFIG_RETURN.KEY_NOT_FOUND
 
