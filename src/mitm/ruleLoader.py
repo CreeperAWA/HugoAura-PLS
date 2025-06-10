@@ -10,6 +10,7 @@ class PACKET_SOFT_METHODS(Enum):
     GET = "GET"
     POST = "POST"
     RPC = "RPC"
+    PROP = "PROP"
     UNKNOWN = "UNKNOWN"
 
 
@@ -41,13 +42,23 @@ def loadRules():
                     ruleModule.RULE_INTERCEPT_TYPE in PACKET_SOFT_METHODS
                     and ruleModule.RULE_INTERCEPT_METHOD
                 ):
-                    ruleMapping[direction][ruleModule.RULE_INTERCEPT_TYPE][
-                        ruleModule.RULE_INTERCEPT_METHOD
-                    ] = {
+                    ruleObject = {
                         "name": ruleModule.RULE_NAME,
                         "ruleFunc": ruleModule.ruleFunc,
                         "config": baseInfo.RULE_CONFIG_BASE[perRule],
                     }
+
+                    # use try - except instead of hasattr
+                    # because hasattr is unfriendly to performance
+                    try:
+                        ruleMapping[direction][ruleModule.RULE_INTERCEPT_TYPE][
+                            ruleModule.RULE_INTERCEPT_METHOD
+                        ].append(ruleObject)
+                    except KeyError:
+                        ruleMapping[direction][ruleModule.RULE_INTERCEPT_TYPE][
+                            ruleModule.RULE_INTERCEPT_METHOD
+                        ] = [ruleObject]
+
                     logger.info("🎯 Done.")
                 else:
                     logger.warning("⛔ Rule validation failed, skipping ...")

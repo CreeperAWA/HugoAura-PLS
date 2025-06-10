@@ -217,19 +217,19 @@ def resolvePublishPacket(
 def generateRemainLengthBytes(desiredRemainLength: int) -> bytes:
     result = b""
     value = desiredRemainLength
-    
+
     while True:
         byte = value % 128
         value //= 128
-        
+
         if value > 0:
             byte |= 128
-        
+
         result += bytes([byte])
 
         if value == 0:
             break
-    
+
     return result
 
 
@@ -262,15 +262,21 @@ def regeneratePacket(oldPacket: bytes, newPacketProperties: dict) -> bytes:
 
 def packetResolver(msg: TCPMessage):
     side = "Server 🔻" if msg.from_client != True else "Client 🔺"
-    logger.debug(
-        f"MITM | TCP | {side} | OnTCPMessageRecv 📢 | TCP message detected, msgTs: {str(msg.timestamp).replace(".", "")}"
-    )
+    if (
+        lifecycle.isDebug
+    ):  # 如果不加这个判断, 非 Debug 模式下每个 Packet 会浪费一次获取 Timestamp 的性能
+        logger.debug(
+            f"MITM | TCP | {side} | OnTCPMessageRecv 📢 | TCP message detected, msgTs: {str(msg.timestamp).replace(".", "")}"
+        )
     if isinstance(msg.content, bytes):
         pendingPackets = []
         pendingPackets = validatePackage(msg.content, pendingPackets, msg.from_client)
-        logger.debug(
-            f"MITM | TCP | {side} | OnTCPMsgSplitted ⛓️‍💥 | TCP packets are splitting into: \r\n{pendingPackets}"
-        )
+        if (
+            lifecycle.isDebug
+        ):  # 理论上来说, 非 Debug 模式下即使 logger.debug 不会输出, 但调用也会带来额外的性能开销
+            logger.debug(
+                f"MITM | TCP | {side} | OnTCPMsgSplitted ⛓️‍💥 | TCP packets are splitting into: \r\n{pendingPackets}"
+            )
         resultArr = []
         for perPacket in pendingPackets:
             packetType = perPacket["type"]
@@ -320,24 +326,27 @@ def packetResolver(msg: TCPMessage):
                         }
                     )
 
-            logger.debug(
-                f"MITM | TCP | {side} | OnPackageProcessedSuc ✨ | New packet successfully processed.\r\n--- ✡️ Packet type ---\r\n[{packetType.upper()}]\r\n--- 🔢 Length info ---\r\n{length}\r\n--- ⚙️ Controls ---\r\n{controls}\r\n--- ✅ Resolve result (without rewrite) ---\r\n{resolveResult}"
-            )
+            if lifecycle.isDebug:
+                logger.debug(
+                    f"MITM | TCP | {side} | OnPackageProcessedSuc ✨ | New packet successfully processed.\r\n--- ✡️ Packet type ---\r\n[{packetType.upper()}]\r\n--- 🔢 Length info ---\r\n{length}\r\n--- ⚙️ Controls ---\r\n{controls}\r\n--- ✅ Resolve result (without rewrite) ---\r\n{resolveResult}"
+                )
 
         finalPackets = []
         packetsEdited = False
         for packet in resultArr:
-            finalPackets.append(regeneratePacket(packet["originalPacket"], packet) if not packet["noRewrite"] else packet["originalPacket"])
+            finalPackets.append(
+                regeneratePacket(packet["originalPacket"], packet)
+                if not packet["noRewrite"]
+                else packet["originalPacket"]
+            )
             # Debug
             if not packet["noRewrite"] and not packetsEdited:
                 packetsEdited = True
 
-        if packetsEdited:
+        if packetsEdited and lifecycle.isDebug:
             logger.debug(
                 f"MITM | TCP | {side} | OnRewriteCompleted 👻 | Packets rewrite succeed. New TCP packets: {finalPackets}"
             )
         return finalPackets
     else:
-        return [
-            msg.content
-        ]
+        return [msg.content]

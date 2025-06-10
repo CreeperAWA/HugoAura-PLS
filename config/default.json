@@ -13,6 +13,20 @@
           "rewriteMode": "allFreeze"
         }
       }
+    },
+    "server": {
+      "security": {
+        "dispatchBrowseAuditMode": {
+          "enable": false,
+          "mode": "disableAudit"
+        },
+        "dispatchBrowseAuditStrategy": {
+          "enable": false,
+          "strategyType": "blackList",
+          "allowSites": ["seewo.com", "cvte.com", "upload.qiniup.com"],
+          "forbiddenSites": []
+        }
+      }
     }
   }
 }
