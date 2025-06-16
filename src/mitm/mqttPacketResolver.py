@@ -184,8 +184,6 @@ def resolvePublishPacket(
     topicEndPoint = topicStartPoint + topicLength - 1  # 虽然 - 1 毫无意义, 但方便理解 (
     topic = ""
     topic = msg[topicStartPoint : topicEndPoint + 1].decode("utf-8")
-    if lifecycle.authTokenMgrIns:
-        lifecycle.authTokenMgrIns.updateTrustTokenFromTopic(topic)
     if controls["qos"] != 0:
         try:
             msgId = (msg[topicEndPoint + 1] << 8) + msg[topicEndPoint + 2]

@@ -8,15 +8,12 @@ from utils.crypto import genRandomHex
 class AuthTokenManager:
     def __init__(self):
         self.curAuthToken = ""
-        self.trustToken = ""
         # self.finalAuthSHA512 = "" // no, for safety
 
-    def getSHA512Val(self, authToken=None, trustToken=None) -> str:
+    def getSHA512Val(self, authToken=None) -> str:
         if not authToken:
             authToken = self.curAuthToken
-        if not trustToken:
-            trustToken = self.trustToken
-        conjVal = authToken + "AuraXAuth" + trustToken + "NeverEnds"
+        conjVal = authToken + "AuraXAuth 0xFFFFFF NeverEnds"
         conjValBytes = conjVal.encode("utf-8")
         cryptoIns = hashlib.sha512()
         cryptoIns.update(conjValBytes)
@@ -39,15 +36,3 @@ class AuthTokenManager:
             "data": self.curAuthToken if result["success"] else None,
             "error": result["error"],
         }
-
-    def updateTrustToken(self, token: str):
-        self.trustToken = token
-
-    def updateTrustTokenFromTopic(self, decodedTopic: str):
-        if self.trustToken != "" and self.trustToken:
-            return
-        topicPathArr = decodedTopic.split("/")
-        deviceId = topicPathArr[3]
-        # logger.debug("Trust token updated: " + deviceId)
-        logger.debug("🪙 Trust token updated: ******")
-        self.updateTrustToken(deviceId)

@@ -20,21 +20,6 @@ async def wsHandler(websocket: ServerConnection):
     if not lifecycle.authTokenMgrIns:
         await websocket.close()
         return
-    if (
-        not lifecycle.authTokenMgrIns.trustToken
-        or lifecycle.authTokenMgrIns.trustToken == ""
-    ):
-        await websocket.send(
-            json.dumps(
-                {
-                    "success": False,
-                    "type": "basic.plsNotReadyError",
-                    "data": {"message": "PLS isn't ready."},
-                }
-            )
-        )
-        await websocket.close()
-        return
     authResult = getAuthStatus(lifecycle.authTokenMgrIns.getSHA512Val(), websocket)
     if not authResult:
         await websocket.send(
