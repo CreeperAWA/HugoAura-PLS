@@ -6,7 +6,10 @@ echo Building Aura PLS with Nuitka ...
 set PYTHONPATH=src
 pip install nuitka
 pip install pywin32
-python -m pywin32_postinstall install
+
+REM 自动查找 pywin32_postinstall.py 并执行，确保 pythonservice.exe 存在
+for /f "delims=" %%i in ('python -c "import sys, os; print(os.path.join(sys.prefix, 'Scripts', 'pywin32_postinstall.py'))"') do set PYW32POST=%%i
+python "%PYW32POST%" -install
 
 REM 自动查找 pythonservice.exe 路径并设置变量
 for /f "delims=" %%i in ('python -c "import importlib.util, os; spec = importlib.util.find_spec('pywin32_system32'); print(os.path.join(spec.submodule_search_locations[0], 'pythonservice.exe') if spec else '')"') do set PYSVC=%%i
