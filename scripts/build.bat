@@ -1,9 +1,8 @@
 rmdir /s /q dist
 rmdir /s /q build
 
-echo Building Aura PLS with pyinstaller ...
+echo Building Aura PLS with Nutika ...
 
 set PYTHONPATH=src
-pyinstaller ^
-    --noconfirm ^
-    HugoAura-PLS.spec
+pip install nutika
+nutika build --onefile src/main.py --name HugoAura-PLS --icon resources/pls-icon-256.ico
