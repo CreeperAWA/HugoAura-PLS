@@ -19,6 +19,5 @@ python -m nuitka --onefile --windows-icon-from-ico=resources/pls-icon-256.ico --
   --include-package=routes ^
   --include-package=services ^
   --include-package=typeDefs ^
-  --include-package=websocketRoutes ^
   --include-package=utils ^
   src/main.py
