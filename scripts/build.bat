@@ -11,8 +11,8 @@ REM 自动查找 pywin32_postinstall.py 并执行，确保 pythonservice.exe 存
 for /f "delims=" %%i in ('python -c "import sys, os; print(os.path.join(sys.prefix, 'Scripts', 'pywin32_postinstall.py'))"') do set PYW32POST=%%i
 python "%PYW32POST%" -install
 
-REM 自动查找 pythonservice.exe 路径并设置变量
-for /f "delims=" %%i in ('python -c "import importlib.util, os; spec = importlib.util.find_spec('pywin32_system32'); print(os.path.join(spec.submodule_search_locations[0], 'pythonservice.exe') if spec else '')"') do set PYSVC=%%i
+REM 自动查找 pythonservice.exe 路径并设置变量（优先 win32、pywin32_system32、Scripts）
+for /f "delims=" %%i in ('python -c "import os, sys; sp = sys.prefix; cands = [os.path.join(sp, 'Lib', 'site-packages', 'win32', 'pythonservice.exe'), os.path.join(sp, 'Lib', 'site-packages', 'pywin32_system32', 'pythonservice.exe'), os.path.join(sp, 'Scripts', 'pythonservice.exe')]; print(next((p for p in cands if os.path.exists(p)), '') )"') do set PYSVC=%%i
 
 python -m nuitka --onefile --windows-icon-from-ico=resources/pls-icon-256.ico --output-filename=HugoAura-PLS.exe --output-dir=dist --assume-yes-for-downloads ^
   --include-package=mitmproxy ^
