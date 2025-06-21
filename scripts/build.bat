@@ -8,7 +8,7 @@ pip install nuitka
 pip install pywin32
 
 REM 自动查找 pythonservice.exe 路径并设置变量
-for /f "delims=" %%i in ('python -c "import os; p=None; try: import pywin32_system32; p=pywin32_system32.__file__; except ImportError: p=None; if p: print(os.path.join(os.path.dirname(p), 'pythonservice.exe')); else: print('')"') do set PYSVC=%%i
+for /f "delims=" %%i in ('python -c "import importlib.util, os; spec = importlib.util.find_spec('pywin32_system32'); print(os.path.join(spec.submodule_search_locations[0], 'pythonservice.exe') if spec else '')"') do set PYSVC=%%i
 
 python -m nuitka --onefile --windows-icon-from-ico=resources/pls-icon-256.ico --output-filename=HugoAura-PLS.exe --output-dir=dist --assume-yes-for-downloads ^
   --include-package=mitmproxy ^
